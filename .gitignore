@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+code/win_app/serial_port_ov7670/.vs/*
+*.tlog
+Debug
+.vscode
