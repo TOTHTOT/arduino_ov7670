@@ -7,19 +7,20 @@
 #define IDS_ABOUTBOX                    101
 #define IDD_SERIAL_PORT_OV7670_DIALOG   102
 #define IDR_MAINFRAME                   128
+#define IDB_BITMAP1                     130
 #define refresh_btn_id                  1001
 #define connect_btn_id                  1002
 #define disconnect_btn_id               1003
 #define serial_port_list_cbb_id         1005
-#define IDC_CUSTOM1                     1006
+#define image_stt_id                    1007
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        130
+#define _APS_NEXT_RESOURCE_VALUE        131
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1007
+#define _APS_NEXT_CONTROL_VALUE         1008
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

@@ -39,6 +39,9 @@ public:
 	CButton connect_btn;
 	CButton disconnect_btn;
 	CButton refresh_btn;
+	CStatic image_stt;
+	CBitmap image_bitmap;
+
 #define GET_IMAGE_CMD "get_image"
 #define APP_EXIT_CMD "app_down"
 	bool is_running;
@@ -50,6 +53,7 @@ public:
 	afx_msg uint8_t send_get_image_cmd();
 	afx_msg uint8_t send_app_down_cmd();
 	afx_msg void SerialReceiveThread();
+	afx_msg void OnReceiveSerialData(uint8_t* image_buf);
 
 private:
 	CString recv_str;
