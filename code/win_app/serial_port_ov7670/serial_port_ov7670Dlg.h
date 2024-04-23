@@ -7,7 +7,8 @@
 #include "mscomm_com.h"
 #include <thread>
 
-
+#define WIDTH 320
+#define HEIGHT 240
 // Cserialportov7670Dlg 对话框
 class Cserialportov7670Dlg : public CDialogEx
 {
@@ -60,4 +61,5 @@ private:
 public:
 	afx_msg void onclick_connect_btn();
 	afx_msg void onclick_disconnecte_btn();
+	afx_msg void OnStnClickedsttid();
 };

@@ -4878,7 +4878,7 @@ void Cserialportov7670Dlg::DoDataExchange(CDataExchange* pDX)
 
 	//image_bitmap.LoadBitmap(image_stt_id);
 	//CStatic* pStaticImage = (CStatic*)GetDlgItem(IDC_STATIC_IMAGE);
-	image_stt.ModifyStyle(0, SS_BITMAP| SS_CENTERIMAGE); // 设置控件样式为位图
+	
 	//image_stt.SetBitmap(image_bitmap);
 
     
@@ -4893,6 +4893,7 @@ BEGIN_MESSAGE_MAP(Cserialportov7670Dlg, CDialogEx)
 	ON_BN_CLICKED(refresh_btn_id, &Cserialportov7670Dlg::onclick_refresh_btn)
 	ON_BN_CLICKED(connect_btn_id, &Cserialportov7670Dlg::onclick_connect_btn)
 	ON_BN_CLICKED(disconnect_btn_id, &Cserialportov7670Dlg::onclick_disconnecte_btn)
+    ON_STN_CLICKED(image_stt_id, &Cserialportov7670Dlg::OnStnClickedsttid)
 END_MESSAGE_MAP()
 
 
@@ -4929,6 +4930,11 @@ BOOL Cserialportov7670Dlg::OnInitDialog()
 
 	// TODO: 在此添加额外的初始化代码
 	
+    image_stt.ModifyStyle(0, SS_BITMAP | SS_CENTERIMAGE); // 设置控件样式为位图
+    CRect rect;
+    image_stt.GetWindowRect(&rect);
+    ScreenToClient(&rect); // 转换为客户区坐标
+    image_stt.SetWindowPos(NULL, rect.left, rect.top, WIDTH, HEIGHT, SWP_NOZORDER | SWP_NOMOVE);
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -5076,13 +5082,54 @@ uint8_t Cserialportov7670Dlg::send_app_down_cmd()
 void Cserialportov7670Dlg::OnReceiveSerialData(uint8_t* image_buf)
 {
 
-#define WIDTH 320
-#define HEIGHT 240
+
 
     if (image_buf[0] == '*' && image_buf[1] == 'R' && image_buf[2] == 'D' && image_buf[3] == 'Y' && image_buf[4] == '*')
     {
-        // 找到图像数据标识符，开始解析图像数据
+#if 1
         TRACE("Found *RDY*\n");
+
+        CBitmap bitmap;
+        CDC* pDC = GetDC(); // 获取当前设备上下文
+        bitmap.CreateCompatibleBitmap(pDC, WIDTH, HEIGHT);
+        ReleaseDC(pDC); // 释放设备上下文
+
+        CDC memDC;
+        memDC.CreateCompatibleDC(NULL);
+		CBitmap* pOldBitmap = memDC.SelectObject(&bitmap);
+		for (int x = 0; x < WIDTH; ++x) {
+			for (int y = HEIGHT; y >= 0 ; --y) {
+#if 0 // 测试填写颜色
+				// 计算颜色值并填充到位图中
+				COLORREF color = RGB(x * 255 / WIDTH, y * 255 / HEIGHT, 0); // 这里简单地使用 x 和 y 来计算颜色值，你可以根据需要修改
+                //COLORREF color = RGB(0xff, 0xb4, 0x00);
+                TRACE("x = %d, y = %d, color = %#x\n", x, y, color);
+                memDC.SetPixel(x, y, color);
+#else
+				uint32_t read_buf_pos = 5 + ((y * WIDTH + x));
+				uint8_t blue = image_buf[read_buf_pos];     // B
+				uint8_t green = image_buf[read_buf_pos]; // G
+				uint8_t red = image_buf[read_buf_pos];   // R
+				COLORREF color = RGB(red, green, blue);
+                if (x == 6)
+                    color = RGB(0xff, 0x00, 0xff);
+				// 将像素设置到位图中
+                TRACE("read pos = %d, x = %d, y = %d, data = %#x, color = %#x\n", read_buf_pos, x, y,blue, color);
+				memDC.SetPixel(y, x, color);
+#endif
+			}
+		}
+        /*COLORREF color = RGB(1, 0xff, 0xb4, 0x00);
+        memDC.SetPixel(0, 50, color);
+        memDC.SetPixel(1, 50, color);
+        memDC.SetPixel(2, 50, color);*/
+        memDC.SelectObject(pOldBitmap);
+        memDC.DeleteDC();
+
+
+        image_stt.SetBitmap(bitmap);
+#else
+        // 找到图像数据标识符，开始解析图像数据
 
         // 创建一个内存设备上下文
         CDC memDC;
@@ -5093,7 +5140,7 @@ void Cserialportov7670Dlg::OnReceiveSerialData(uint8_t* image_buf)
         bitmap.CreateBitmap(WIDTH, HEIGHT, 1, 24, NULL); // 24 表示每个像素占用 24 位 (BGR)
 
         // 将位图选入设备上下文
-        CBitmap* pOldBitmap = memDC.SelectObject(&bitmap);
+        //CBitmap* pOldBitmap = memDC?.?SelectObject(&bitmap);
 
         // 逐个像素设置颜色
         for (int n2 = 0; n2 < WIDTH; ++n2)
@@ -5113,13 +5160,14 @@ void Cserialportov7670Dlg::OnReceiveSerialData(uint8_t* image_buf)
         }
 
         // 清理
-        memDC.SelectObject(pOldBitmap);
-        image_stt.SetBitmap((HBITMAP)bitmap.GetSafeHandle());
-        image_stt.Invalidate(true);
+        memDC.SelectObject(bitmap);
+        image_stt.SetBitmap(bitmap);
+        //image_stt.Invalidate(true);
         // 保存位图到文件
         //SaveBitmapToBMP(&memDC, &bitmap);
         // 提示图像读取成功
         TRACE(_T("Image was read successfully.\n"));
+#endif
     }
     else
     {
@@ -5257,4 +5305,10 @@ void Cserialportov7670Dlg::onclick_disconnecte_btn()
 		connect_btn.EnableWindow(true);
 		disconnect_btn.EnableWindow(false);
 	}
+}
+
+
+void Cserialportov7670Dlg::OnStnClickedsttid()
+{
+    // TODO: 在此添加控件通知处理程序代码
 }
