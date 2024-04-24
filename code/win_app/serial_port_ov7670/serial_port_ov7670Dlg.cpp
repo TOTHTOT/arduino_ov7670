@@ -5182,7 +5182,8 @@ void Cserialportov7670Dlg::SerialReceiveThread()
 	while (is_running)
 	{
 #if 1
-
+        if (is_running == false)
+            return;
         DWORD totalBytesToRead = 5; // 要读取的总字节数为 5
         DWORD bytesRead = 0; // 已经读取的字节数
         char buffer[5]; // 缓冲区大小为 5
@@ -5236,7 +5237,10 @@ void Cserialportov7670Dlg::SerialReceiveThread()
 			memDC.DeleteDC();
 
 			TRACE("updata stt\n");
+            if (is_running == false)
+                return;
 			image_stt.SetBitmap(bitmap);
+            TRACE("updata end\n");
 		}
 		else
 		{
@@ -5338,8 +5342,9 @@ void Cserialportov7670Dlg::onclick_connect_btn()
 	}
     //IsComPortGreaterThanNine(CT2A(strPortID.GetString()));
 
-	//TRACE(_T("strPortID = %s\n"), strPortIDChar);
-	hSerial = CreateFile(_T("\\\\.\\COM11"), GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
+	TRACE(_T("strPortID = %s\n"), strPortID);
+    //hSerial = CreateFile(_T("\\\\.\\COM11"), GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
+	hSerial = CreateFile(strPortID, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
 	if (hSerial == INVALID_HANDLE_VALUE)
 	{
         DWORD dwError = GetLastError();
