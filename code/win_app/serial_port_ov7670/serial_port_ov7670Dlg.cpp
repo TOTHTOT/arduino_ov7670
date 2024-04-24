@@ -5244,7 +5244,7 @@ void Cserialportov7670Dlg::SerialReceiveThread()
 		}
 		else
 		{
-			TRACE("recv head fail\n");
+			//TRACE("recv head fail\n");
 		}
 #else
 		if (ReadFile(hSerial, buffer, WIDTH * HEIGHT, &bytesRead, NULL))
@@ -5278,16 +5278,19 @@ void Cserialportov7670Dlg::SerialReceiveThread()
 }
 
 
-bool IsComPortGreaterThanNine(const std::string& portName)
+bool IsComPortGreaterThanTen(CString& portName)
 {
-    // 获取 COM 口号的数字部分
-    std::string comNumberStr = portName.substr(3); // 假设 COM 口号格式为 "COMx"
-
-    // 将数字部分转换为整数
-    int comNumber = std::stoi(comNumberStr);
-
-    // 判断 COM 口号是否大于 9
-    return comNumber > 9;
+    // 寻找数字部分
+    int startIndex = portName.Find(_T("COM"));
+    if (startIndex != -1) {
+        CString number = portName.Mid(startIndex + 3); // 3 是 "COM" 的长度
+        //AfxMessageBox(number); // 弹出消息框显示数字部分
+        return _tstoi(number) > 10;
+    }
+    else {
+        AfxMessageBox(_T("com 口未找到数字部分"));
+        return false;
+    }
 }
 
 std::string ConvertCStringToString(const CString& cstr)
@@ -5334,13 +5337,19 @@ void Cserialportov7670Dlg::onclick_connect_btn()
 	//获取端口号
     CString strPortID;
 	serial_port_list_cbb.GetWindowText(strPortID);
-
 	if (strPortID.GetLength() <= 0)
 	{
         AfxMessageBox(_T("Failed to get serial port name.\n"));
 		return;
 	}
-    //IsComPortGreaterThanNine(CT2A(strPortID.GetString()));
+
+    //CString test_strPortID = _T("COM11");
+    // windows 处理 com10 以上的con口需要添加 "\\\\.\\" 才能打开成功设备
+    if (IsComPortGreaterThanTen(strPortID) == true)
+    {
+        CString prefix = _T("\\\\.\\");
+        strPortID.Insert(0, prefix);
+    }
 
 	TRACE(_T("strPortID = %s\n"), strPortID);
     //hSerial = CreateFile(_T("\\\\.\\COM11"), GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
