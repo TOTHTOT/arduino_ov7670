@@ -30,7 +30,7 @@
 
 - 打开 `./resource/serial_port_ov7670.exe`程序, 按照下图配置:
   
-  ![使用方法图](.\images\soft_man_page.png)
+  ![使用方法图](./images/soft_man_page.png)
 
 ## 目录
 
@@ -47,10 +47,10 @@ D:.
 
 ## 实物图
 
-![实物图](.\images\device.png)
+![实物图](./images/device.png)
 
 ## 软件测试结果
 
-![软件测试图](.\images\soft_test.png)
+![软件测试图](./images/soft_test.png)
 
 ## 其他
